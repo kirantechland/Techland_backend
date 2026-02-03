@@ -29,7 +29,14 @@ app.use(helmet({
 }));
 app.use(compression());
 app.use(cors({
-  origin: process.env.CORS_ORIGIN ? process.env.CORS_ORIGIN.split(",") : "http://localhost:3000",
+  origin: (origin, callback) => {
+    const allowed = ["http://localhost:5173", "http://localhost:3000"];
+    if (!origin || allowed.includes(origin) || origin.endsWith(".vercel.app") || origin.endsWith(".onrender.com")) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
   credentials: true,
 }));
 app.use(cookieParser());
@@ -43,6 +50,11 @@ app.use("/api", apiLimiter);
 
 // Routes
 app.use("/api", routes);
+
+// Favicon (avoid 404s in logs)
+app.get("/favicon.ico", (req, res) => {
+  res.status(204).end();
+});
 
 // Health check endpoint
 app.get("/health", (req, res) => {
