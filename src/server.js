@@ -30,10 +30,22 @@ app.use(helmet({
 app.use(compression());
 app.use(cors({
   origin: (origin, callback) => {
-    const allowed = ["http://localhost:5173", "http://localhost:3000"];
-    if (!origin || allowed.includes(origin) || origin.endsWith(".vercel.app") || origin.endsWith(".onrender.com")) {
+    // defined allowed origins from enc variable
+    const envAllowed = process.env.CORS_ORIGIN ? process.env.CORS_ORIGIN.split(",").map(o => o.trim()) : [];
+    const defaultAllowed = ["http://localhost:5173", "http://localhost:3000", "http://localhost:5174"];
+
+    // Check if origin is allowed
+    const isAllowed =
+      !origin ||
+      defaultAllowed.includes(origin) ||
+      envAllowed.includes(origin) ||
+      origin.endsWith(".vercel.app") ||
+      origin.endsWith(".onrender.com");
+
+    if (isAllowed) {
       callback(null, true);
     } else {
+      console.log(`🚫 CORS Blocked: ${origin}`);
       callback(new Error("Not allowed by CORS"));
     }
   },
