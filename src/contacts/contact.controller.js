@@ -2,36 +2,36 @@ import Contact from "./contact.model.js";
 import nodemailer from "nodemailer";
 
 export const submitContactForm = async (req, res) => {
-    try {
-        const { name, email, phone, subject, message } = req.body;
+  try {
+    const { name, email, phone, subject, message } = req.body;
 
-        if (!name || !email || !message) {
-            return res.status(400).json({ message: "Please provide name, email and message." });
-        }
+    if (!name || !email || !message) {
+      return res.status(400).json({ message: "Please provide name, email and message." });
+    }
 
-        // 1. Save to Database
-        const newContact = await Contact.create({
-            name,
-            email,
-            phone,
-            subject,
-            message,
-        });
+    // 1. Save to Database
+    const newContact = await Contact.create({
+      name,
+      email,
+      phone,
+      subject,
+      message,
+    });
 
-        // 2. Send Email Notification
-        const transporter = nodemailer.createTransport({
-            service: 'gmail', // You can change this to your provider
-            auth: {
-                user: process.env.EMAIL_USER,
-                pass: process.env.EMAIL_PASS,
-            },
-        });
+    // 2. Send Email Notification
+    const transporter = nodemailer.createTransport({
+      service: 'gmail', // You can change this to your provider
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
+      },
+    });
 
-        const mailOptions = {
-            from: `"Techland Contact" <${process.env.EMAIL_USER}>`,
-            to: process.env.ADMIN_EMAIL || process.env.EMAIL_USER,
-            subject: `New Inquiry: ${subject || "No Subject"} - from ${name}`,
-            html: `
+    const mailOptions = {
+      from: `"Techland Contact" <${process.env.EMAIL_USER}>`,
+      to: process.env.ADMIN_EMAIL || process.env.EMAIL_USER,
+      subject: `New Inquiry: ${subject || "No Subject"} - from ${name}`,
+      html: `
         <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e0e0e0; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.05);">
           <div style="background: linear-gradient(135deg, #163198 0%, #0d257a 100%); color: white; padding: 25px; text-align: center;">
             <h2 style="margin: 0; font-size: 24px; letter-spacing: 1px;">New Contact Inquiry</h2>
@@ -80,41 +80,38 @@ export const submitContactForm = async (req, res) => {
           </div>
         </div>
       `,
-        };
+    };
 
-        // We don't want to block the response if email fails, but we'll try/catch it
-        try {
-            await transporter.sendMail(mailOptions);
-        } catch (emailError) {
-            console.error("Email sending failed:", emailError);
-            // We still return success because it's saved in DB
-        }
+    // Send email in the background so it doesn't block the response
+    transporter.sendMail(mailOptions).catch(emailError => {
+      console.error("Email sending failed in background:", emailError);
+    });
 
-        res.status(201).json({
-            success: true,
-            message: "Message received successfully!",
-            contact: newContact
-        });
+    res.status(201).json({
+      success: true,
+      message: "Message received successfully!",
+      contact: newContact
+    });
 
-    } catch (error) {
-        res.status(500).json({ message: error.message });
-    }
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
 };
 
 export const getContacts = async (req, res) => {
-    try {
-        const contacts = await Contact.find().sort({ createdAt: -1 });
-        res.json(contacts);
-    } catch (error) {
-        res.status(500).json({ message: error.message });
-    }
+  try {
+    const contacts = await Contact.find().sort({ createdAt: -1 });
+    res.json(contacts);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
 };
 
 export const deleteContact = async (req, res) => {
-    try {
-        await Contact.findByIdAndDelete(req.params.id);
-        res.json({ success: true, message: "Deleted" });
-    } catch (error) {
-        res.status(500).json({ message: error.message });
-    }
+  try {
+    await Contact.findByIdAndDelete(req.params.id);
+    res.json({ success: true, message: "Deleted" });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
 };
