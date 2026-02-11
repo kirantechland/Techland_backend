@@ -33,26 +33,36 @@ app.use(helmet({
 app.use(compression());
 app.use(cors({
   origin: (origin, callback) => {
-    // defined allowed origins from enc variable
-    const envAllowed = process.env.CORS_ORIGIN ? process.env.CORS_ORIGIN.split(",").map(o => o.trim()) : [];
-    const defaultAllowed = ["http://localhost:5173", "http://localhost:3000", "http://localhost:5174"];
-    // Check if origin is allowed
-    const isAllowed =
-      !origin ||
-      origin.startsWith("http://localhost:") ||
-      envAllowed.includes(origin) ||
-      origin.endsWith(".vercel.app") ||
-      origin.endsWith(".onrender.com");
 
-    if (isAllowed) {
-      callback(null, true);
-    } else {
-      console.log(`🚫 CORS Blocked: ${origin}`);
-      callback(new Error("Not allowed by CORS"));
+    // Allow requests with no origin (like Postman or server-to-server)
+    if (!origin) return callback(null, true);
+
+    // Allow localhost (development)
+    if (origin.includes("localhost")) {
+      return callback(null, true);
     }
+
+    // Allow Hostinger domains
+    if (origin.includes("hostingersite.com")) {
+      return callback(null, true);
+    }
+
+    // Allow Vercel deployments
+    if (origin.includes("vercel.app")) {
+      return callback(null, true);
+    }
+
+    // Allow Render deployments
+    if (origin.includes("onrender.com")) {
+      return callback(null, true);
+    }
+
+    console.log("🚫 CORS Blocked:", origin);
+    callback(new Error("Not allowed by CORS"));
   },
   credentials: true,
 }));
+
 app.use(cookieParser());
 app.use(express.json());
 
