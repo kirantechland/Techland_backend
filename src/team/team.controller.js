@@ -1,4 +1,5 @@
 import Team from "./team.model.js";
+import { deleteFile } from "../utils/fileUtils.js";
 
 /* CREATE */
 export const addTeamMember = async (req, res) => {
@@ -29,7 +30,12 @@ export const getTeam = async (req, res) => {
 
 /* DELETE */
 export const deleteTeamMember = async (req, res) => {
-  await Team.findByIdAndDelete(req.params.id);
+  const { id } = req.params;
+  const member = await Team.findById(id);
+  if (member && member.image) {
+    deleteFile(member.image);
+  }
+  await Team.findByIdAndDelete(id);
   res.json({ success: true });
 };
 
@@ -38,5 +44,5 @@ export const toggleTeamStatus = async (req, res) => {
   const member = await Team.findById(req.params.id);
   member.isActive = !member.isActive;
   await member.save();
-  res.json(member);
+  res.json(member);     
 };

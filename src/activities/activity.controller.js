@@ -1,4 +1,5 @@
 import Activity from "./activity.model.js";
+import { deleteFile } from "../utils/fileUtils.js";
 
 /* CREATE */
 export const addActivity = async (req, res) => {
@@ -35,7 +36,12 @@ export const getActivities = async (req, res) => {
 /* DELETE */
 export const deleteActivity = async (req, res) => {
     try {
-        await Activity.findByIdAndDelete(req.params.id);
+        const { id } = req.params;
+        const activity = await Activity.findById(id);
+        if (activity && activity.image) {
+            deleteFile(activity.image);
+        }
+        await Activity.findByIdAndDelete(id);
         res.json({ success: true, message: "Activity deleted" });
     } catch (err) {
         res.status(500).json({ message: err.message });

@@ -1,4 +1,5 @@
 import Client from "./client.model.js";
+import { deleteFile } from "../utils/fileUtils.js";
 
 /* CREATE */
 export const addClient = async (req, res) => {
@@ -34,7 +35,12 @@ export const getClients = async (req, res) => {
 /* DELETE */
 export const deleteClient = async (req, res) => {
     try {
-        await Client.findByIdAndDelete(req.params.id);
+        const { id } = req.params;
+        const client = await Client.findById(id);
+        if (client && client.logo) {
+            deleteFile(client.logo);
+        }
+        await Client.findByIdAndDelete(id);
         res.json({ success: true, message: "Client deleted" });
     } catch (err) {
         res.status(500).json({ message: err.message });

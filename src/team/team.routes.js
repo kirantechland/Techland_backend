@@ -16,4 +16,4 @@ router.post("/", uploadTeamImage.single("image"), addTeamMember);
 router.delete("/:id", deleteTeamMember);
 router.patch("/:id/toggle", toggleTeamStatus);
 
-export default router;
+export default router;   

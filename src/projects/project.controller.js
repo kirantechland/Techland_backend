@@ -1,4 +1,5 @@
 import Project from "./project.model.js";
+import { deleteFile } from "../utils/fileUtils.js";
 
 /* CREATE */
 export const addProject = async (req, res) => {
@@ -37,6 +38,12 @@ export const getProjects = async (req, res) => {
 export const deleteProject = async (req, res) => {
     try {
         const { id } = req.params;
+        const project = await Project.findById(id);
+
+        if (project && project.image) {
+            deleteFile(project.image);
+        }
+
         await Project.findByIdAndDelete(id);
         res.status(200).json({ message: "Project deleted successfully" });
     } catch (error) {
@@ -56,7 +63,7 @@ export const toggleProjectStatus = async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 };
-     
+
 /* UPDATE STATUS TEXT */
 export const updateProjectStatus = async (req, res) => {
     try {
