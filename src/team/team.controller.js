@@ -13,7 +13,9 @@ export const addTeamMember = async (req, res) => {
     const member = await Team.create({
       name,
       role,
-      image: `/uploads/team/${req.file.filename}`,
+      image: (req.file.path && req.file.path.startsWith("http"))
+        ? req.file.path
+        : `/uploads/team/${req.file.filename}`,
     });
 
     res.json(member);
@@ -44,5 +46,5 @@ export const toggleTeamStatus = async (req, res) => {
   const member = await Team.findById(req.params.id);
   member.isActive = !member.isActive;
   await member.save();
-  res.json(member);     
+  res.json(member);
 };

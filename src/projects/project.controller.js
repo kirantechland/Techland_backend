@@ -15,7 +15,9 @@ export const addProject = async (req, res) => {
             category,
             client,
             status,
-            image: `/uploads/projects/${req.file.filename}`,
+            image: (req.file.path && req.file.path.startsWith("http"))
+                ? req.file.path
+                : `/uploads/projects/${req.file.filename}`,
         });
 
         res.status(201).json(project);

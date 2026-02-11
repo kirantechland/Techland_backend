@@ -13,7 +13,9 @@ export const addClient = async (req, res) => {
         const client = await Client.create({
             name,
             industry,
-            logo: `/uploads/clients/${req.file.filename}`,
+            logo: (req.file.path && req.file.path.startsWith("http"))
+                ? req.file.path
+                : `/uploads/clients/${req.file.filename}`,
         });
 
         res.json(client);

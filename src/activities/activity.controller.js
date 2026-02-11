@@ -14,7 +14,9 @@ export const addActivity = async (req, res) => {
             title,
             description,
             date,
-            image: `/uploads/activities/${req.file.filename}`,
+            image: (req.file.path && req.file.path.startsWith("http"))
+                ? req.file.path
+                : `/uploads/activities/${req.file.filename}`,
         });
 
         res.json(activity);

@@ -15,7 +15,9 @@ export const addTestimonial = async (req, res) => {
             designation,
             message,
             rating,
-            image: `/uploads/testimonials/${req.file.filename}`,
+            image: (req.file.path && req.file.path.startsWith("http"))
+                ? req.file.path
+                : `/uploads/testimonials/${req.file.filename}`,
         });
 
         res.json(testimonial);
