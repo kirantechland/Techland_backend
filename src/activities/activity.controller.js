@@ -50,6 +50,30 @@ export const deleteActivity = async (req, res) => {
     }
 };
 
+/* UPDATE */
+export const updateActivity = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { title, description, date } = req.body;
+        const activity = await Activity.findById(id);
+        if (!activity) return res.status(404).json({ message: "Activity not found" });
+
+        const updateData = { title, description, date };
+
+        if (req.file) {
+            if (activity.image) deleteFile(activity.image);
+            updateData.image = (req.file.path && req.file.path.startsWith("http"))
+                ? req.file.path
+                : `/uploads/activities/${req.file.filename}`;
+        }
+
+        const updatedActivity = await Activity.findByIdAndUpdate(id, updateData, { new: true });
+        res.json(updatedActivity);
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+};
+
 /* TOGGLE ACTIVE */
 export const toggleActivityStatus = async (req, res) => {
     try {
@@ -63,3 +87,4 @@ export const toggleActivityStatus = async (req, res) => {
         res.status(500).json({ message: err.message });
     }
 };
+

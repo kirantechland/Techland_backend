@@ -77,3 +77,28 @@ export const updateProjectStatus = async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 };
+
+/* UPDATE FULL */
+export const updateProject = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { title, category, client, status } = req.body;
+        const project = await Project.findById(id);
+        if (!project) return res.status(404).json({ message: "Project not found" });
+
+        const updateData = { title, category, client, status };
+
+        if (req.file) {
+            if (project.image) deleteFile(project.image);
+            updateData.image = (req.file.path && req.file.path.startsWith("http"))
+                ? req.file.path
+                : `/uploads/projects/${req.file.filename}`;
+        }
+
+        const updatedProject = await Project.findByIdAndUpdate(id, updateData, { new: true });
+        res.json(updatedProject);
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+};
+

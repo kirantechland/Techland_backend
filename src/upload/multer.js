@@ -41,8 +41,7 @@ const fileFilter = (req, file, cb) => {
 };
 
 /**
- * STORAGE CONFIGURATION
- * Switches between Local Disk and Cloudinary based on environment variables
+
  */
 const getStorage = (dir) => {
   // Check if Cloudinary is configured

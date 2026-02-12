@@ -4,6 +4,7 @@ import {
     getActivities,
     deleteActivity,
     toggleActivityStatus,
+    updateActivity,
 } from "./activity.controller.js";
 import { uploadActivityImage } from "../upload/multer.js";
 
@@ -11,6 +12,7 @@ const router = express.Router();
 
 router.get("/", getActivities);
 router.post("/", uploadActivityImage.single("image"), addActivity);
+router.put("/:id", uploadActivityImage.single("image"), updateActivity);
 router.delete("/:id", deleteActivity);
 router.patch("/:id/toggle", toggleActivityStatus);
 

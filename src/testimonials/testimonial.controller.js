@@ -51,6 +51,30 @@ export const deleteTestimonial = async (req, res) => {
     }
 };
 
+/* UPDATE */
+export const updateTestimonial = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { name, designation, message, rating } = req.body;
+        const testimonial = await Testimonial.findById(id);
+        if (!testimonial) return res.status(404).json({ message: "Testimonial not found" });
+
+        const updateData = { name, designation, message, rating };
+
+        if (req.file) {
+            if (testimonial.image) deleteFile(testimonial.image);
+            updateData.image = (req.file.path && req.file.path.startsWith("http"))
+                ? req.file.path
+                : `/uploads/testimonials/${req.file.filename}`;
+        }
+
+        const updatedTestimonial = await Testimonial.findByIdAndUpdate(id, updateData, { new: true });
+        res.json(updatedTestimonial);
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+};
+
 /* TOGGLE ACTIVE */
 export const toggleTestimonialStatus = async (req, res) => {
     try {
@@ -64,3 +88,4 @@ export const toggleTestimonialStatus = async (req, res) => {
         res.status(500).json({ message: err.message });
     }
 };
+

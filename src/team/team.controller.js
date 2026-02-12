@@ -41,6 +41,30 @@ export const deleteTeamMember = async (req, res) => {
   res.json({ success: true });
 };
 
+/* UPDATE */
+export const updateTeamMember = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { name, role } = req.body;
+    const member = await Team.findById(id);
+    if (!member) return res.status(404).json({ message: "Member not found" });
+
+    const updateData = { name, role };
+
+    if (req.file) {
+      if (member.image) deleteFile(member.image);
+      updateData.image = (req.file.path && req.file.path.startsWith("http"))
+        ? req.file.path
+        : `/uploads/team/${req.file.filename}`;
+    }
+
+    const updatedMember = await Team.findByIdAndUpdate(id, updateData, { new: true });
+    res.json(updatedMember);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
 /* TOGGLE ACTIVE */
 export const toggleTeamStatus = async (req, res) => {
   const member = await Team.findById(req.params.id);
@@ -48,3 +72,4 @@ export const toggleTeamStatus = async (req, res) => {
   await member.save();
   res.json(member);
 };
+

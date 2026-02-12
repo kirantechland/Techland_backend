@@ -49,6 +49,30 @@ export const deleteClient = async (req, res) => {
     }
 };
 
+/* UPDATE */
+export const updateClient = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { name, industry } = req.body;
+        const client = await Client.findById(id);
+        if (!client) return res.status(404).json({ message: "Client not found" });
+
+        const updateData = { name, industry };
+
+        if (req.file) {
+            if (client.logo) deleteFile(client.logo);
+            updateData.logo = (req.file.path && req.file.path.startsWith("http"))
+                ? req.file.path
+                : `/uploads/clients/${req.file.filename}`;
+        }
+
+        const updatedClient = await Client.findByIdAndUpdate(id, updateData, { new: true });
+        res.json(updatedClient);
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+};
+
 /* TOGGLE ACTIVE */
 export const toggleClientStatus = async (req, res) => {
     try {
@@ -62,3 +86,4 @@ export const toggleClientStatus = async (req, res) => {
         res.status(500).json({ message: err.message });
     }
 };
+
