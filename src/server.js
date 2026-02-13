@@ -23,9 +23,6 @@ const PORT = process.env.PORT || 5000;
 // Trust proxy - Required for Render and other reverse proxies
 app.set('trust proxy', 1);
 
-// Connect to Database
-connectDB();
-
 // Middleware
 app.use(helmet({
   crossOriginResourcePolicy: false, // Essential for serving images from the same server
@@ -54,6 +51,11 @@ app.use(cors({
 
     // Allow Render deployments
     if (origin.includes("onrender.com")) {
+      return callback(null, true);
+    }
+
+    // Allow Main domains
+    if (origin.includes("techlanditsolutions.com")) {
       return callback(null, true);
     }
 
@@ -118,6 +120,20 @@ app.use(notFoundHandler);
 // Global error handler - must be last
 app.use(errorHandler);
 
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+// Unified startup function
+const startServer = async () => {
+  try {
+    // 1. Connect to Database FIRST
+    await connectDB();
+
+    // 2. Start Listening
+    app.listen(PORT, () => {
+      console.log(`🚀 Server running in ${process.env.NODE_ENV || 'development'} mode on port ${PORT}`);
+    });
+  } catch (error) {
+    console.error("❌ Failed to start server:", error.message);
+    process.exit(1);
+  }
+};
+
+startServer();
